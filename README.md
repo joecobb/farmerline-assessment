@@ -1,4 +1,4 @@
-# Farmerline Assessment Project
+# Farmerline Assessment
 
 This is the **Farmerline Assessment Project**, a Laravel application integrated with React and Inertia.js. Follow the steps below to set up, configure, and run the project.
 
@@ -22,7 +22,7 @@ Ensure the following are installed on your system:
 
 ```bash
 $ git clone <repository-url>
-$ cd farmerline-assessment-project
+$ cd farmerline-assessment
 ```
 
 ### 2. Install Backend Dependencies
