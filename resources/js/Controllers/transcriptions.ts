@@ -11,7 +11,8 @@ export const uploadAudioBlob = async (audioBlob: Blob, userId: any) => {
 
     const response = await axios.post("/api/v1/transcriptions", formData, {
         headers: {
-            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+            "Content-Type": "multipart/form-data"
         },
     });
     return response.data;
@@ -19,6 +20,10 @@ export const uploadAudioBlob = async (audioBlob: Blob, userId: any) => {
 
 // Get all transcriptions for a user
 export const getTranscriptions = async (userId: any) => {
-    const response = await axios.get(`/api/v1/transcriptions/${userId}`);
+    const response = await axios.get(`/api/v1/transcriptions/${userId}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+        }
+    });
     return response.data.transcriptions;
 };
