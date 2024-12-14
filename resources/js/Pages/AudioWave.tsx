@@ -119,7 +119,8 @@ const AudioWave = ({ onUploadDone }: any) => {
                 barWidth: 5,
                 barRadius: 5,
                 barHeight: 2,
-                audioRate: 10,
+                backend: 'MediaElement',
+                minPxPerSec: 50,
             });
 
             // Initialize the Record plugin
@@ -128,7 +129,6 @@ const AudioWave = ({ onUploadDone }: any) => {
                     renderRecordedAudio: false,
                     scrollingWaveform: true,
                     continuousWaveform: false,
-                    continuousWaveformDuration: 30, // optional
                 }),
             );
 
@@ -162,6 +162,7 @@ const AudioWave = ({ onUploadDone }: any) => {
 
             recordPlugin.on('record-start', (time: any) => {
                 // startSilenceDetection();
+                console.log("started");
             });
 
             recordPlugin.on('record-progress', (time: any) => {
@@ -189,14 +190,11 @@ const AudioWave = ({ onUploadDone }: any) => {
             }} className="bg-dark text-white px-6 py-3 rounded-lg mt-4">Start Transcription</button>}
 
 
-            <div className="mx-auto max-w-[250px] lg:max-w-[500px] w-full lg:mt-32" ref={soundWaveRef} style={{ borderRadius: 4 }}></div>
-
-
+            <div className="mx-auto max-w-[250px] lg:max-w-[500px]  lg:mt-32" ref={soundWaveRef} style={{ borderRadius: 4 }}></div>
 
             {isRecording && <button onClick={() => {
                 recordPlugin.stopRecording();
                 setIsRecording(false);
-
             }} className="bg-white w-10 h-10 shadow rounded-xl flex justify-center items-center mx-auto lg:mt-52 mt-28"><img className="w-[24px] h-[24px]" src="/images/close.png" alt="close" /></button>}
         </div>
     );
