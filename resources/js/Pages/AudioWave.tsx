@@ -120,7 +120,7 @@ const AudioWave = ({ onUploadDone }: any) => {
                 barRadius: 5,
                 barHeight: 2,
                 backend: 'MediaElement',
-                minPxPerSec: 50,
+                minPxPerSec: 100,
             });
 
             // Initialize the Record plugin
