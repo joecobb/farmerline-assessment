@@ -4,6 +4,7 @@ import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js';
 import { uploadAudioBlob } from '@/Controllers/transcriptions';
 import { Head, usePage } from '@inertiajs/react';
 import { closeLoadingAlert, showLoadingAlert } from '@/Controllers/utils';
+import Swal from 'sweetalert2';
 
 
 
@@ -123,6 +124,7 @@ const AudioWave = ({ onUploadDone }: any) => {
                 minPxPerSec: 100,
             });
 
+
             // Initialize the Record plugin
             record = wavesurfer.registerPlugin(
                 RecordPlugin.create({
@@ -142,6 +144,14 @@ const AudioWave = ({ onUploadDone }: any) => {
 
         // Mic selection
         RecordPlugin.getAvailableAudioDevices().then((availableMics: any) => {
+            if (availableMics.length == 0) {
+                Swal.fire({
+                    title: "Error",
+                    text: "Please make sure a mic is connected",
+                    icon: "error"
+                });
+                return;
+            }
             setMic(availableMics[0].deviceId);
         });
 
@@ -159,6 +169,7 @@ const AudioWave = ({ onUploadDone }: any) => {
 
     useEffect(() => {
         if (recordPlugin) {
+
 
             recordPlugin.on('record-start', (time: any) => {
                 // startSilenceDetection();
