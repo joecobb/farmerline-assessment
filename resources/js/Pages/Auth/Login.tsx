@@ -2,6 +2,7 @@ import Checkbox from '@/Components/Checkbox';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
+import SecondaryButton from '@/Components/SecondaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
@@ -88,6 +89,17 @@ export default function Login({
                 </div>
 
                 <div className="mt-4 flex items-center justify-end">
+
+                    <SecondaryButton onClick={() => {
+                        window.location.href = route('register');
+                    }} className='ms-4'>
+                        Register
+                    </SecondaryButton>
+                    <PrimaryButton className="ms-4" disabled={processing}>
+                        Log in
+                    </PrimaryButton>
+                </div>
+                <div className="mt-3 flex items-center justify-end">
                     {canResetPassword && (
                         <Link
                             href={route('password.request')}
@@ -96,10 +108,6 @@ export default function Login({
                             Forgot your password?
                         </Link>
                     )}
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
                 </div>
             </form>
         </GuestLayout>
