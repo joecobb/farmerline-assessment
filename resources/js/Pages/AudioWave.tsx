@@ -21,48 +21,61 @@ const AudioWave = ({ onUploadDone }: any) => {
     const [recordPlugin, setRecordPlugin] = useState<any>();
     const [waveSurfer, setWaveSurfer] = useState<any>();
 
+    // Threshold and silence detection parameters
+    const silenceThreshold = 0.04; // Amplitude threshold to consider as silence
+    const silenceDuration = 2; // Duration in seconds to detect silence
+    let silenceStartTime: any = null; // To track when silence starts
+    let silenceDetected = false;
+    let silenceDetectionInterval: any = null;
 
-    let silenceTimer: any = null;
-    const silenceDuration = 3000; // 3 seconds of silence to stop recording
-    const silenceThreshold = 0.02;
+    // Function to detect silence during recording
+    const detectSilence = () => {
+        // Get the peaks from the recorded audio
+        const peaks = waveSurfer.exportPeaks()[0];
 
-    function clearSilenceTimer() {
-        if (silenceTimer) {
-            clearTimeout(silenceTimer);
-            silenceTimer = null;
-        }
-    }
+        // Set the time window based on peaks' length and the sample rate
+        const sampleRate = peaks.length / waveSurfer.getDuration();
+        const secondsPerSample = 1 / sampleRate;
 
-    const startSilenceDetection = () => {
+        // Define the number of samples corresponding to 4 seconds
+        const samplesForSilence = Math.floor(silenceDuration / secondsPerSample);
 
-        const analyser = waveSurfer.backend.getAnalyserNode();
-        const dataArray = new Uint8Array(analyser.fftSize);
+        // Check the most recent `samplesForSilence` values in the peaks array
+        const recentPeaks = peaks.slice(-samplesForSilence);
 
-        const detectSilence = () => {
-            analyser.getByteTimeDomainData(dataArray);
+        // Check if all values in the `recentPeaks` are below the silence threshold
+        const isSilent = recentPeaks.every((value: any) => value < silenceThreshold);
 
-            // Check if the average volume is below the threshold
-            const averageVolume = dataArray.reduce((sum, value) => sum + Math.abs(value - 128), 0) / dataArray.length;
-            const isSilent = averageVolume < silenceThreshold * 128;
-
-            if (isSilent) {
-                if (!silenceTimer) {
-                    silenceTimer = setTimeout(() => {
-                        console.log('Silence detected, stopping recording');
-                        recordPlugin.stop();
-                    }, silenceDuration);
+        if (isSilent) {
+            if (!silenceStartTime) {
+                silenceStartTime = Date.now(); // Mark when silence starts
+                console.log("Silence detected, starting timer...");
+            } else if (Date.now() - silenceStartTime >= silenceDuration * 1000) {
+                if (!silenceDetected) {
+                    silenceDetected = true;
+                    console.log(`Silence of ${silenceDuration} seconds detected!`);
+                    recordPlugin.stopRecording();
+                    // Trigger any action when silence is detected
                 }
-            } else {
-                clearSilenceTimer();
             }
+        } else {
+            silenceStartTime = null; // Reset silence start time
+            silenceDetected = false; // Reset silence detection
+        }
+    };
 
-            // Continue checking if recording is active
-            if (recordPlugin.isRecording()) {
-                requestAnimationFrame(detectSilence);
-            }
-        };
+    // Run the silence detection periodically
+    const startSilenceDetection = () => {
+        silenceDetectionInterval = setInterval(() => {
+            detectSilence(); // Check for silence every 2 seconds
+        }, 2000);
+    };
 
-        detectSilence();
+    const clearSilenceDetectionInterval = () => {
+        if (silenceDetectionInterval) {
+            clearInterval(silenceDetectionInterval);
+            silenceDetectionInterval = null;
+        }
     }
 
 
@@ -77,7 +90,7 @@ const AudioWave = ({ onUploadDone }: any) => {
 
 
     const handleAudioSubmission = async (blob: Blob) => {
-        debugger;
+
         if (isTranscribing) return;
 
         setIsTranscribing(true);
@@ -172,7 +185,7 @@ const AudioWave = ({ onUploadDone }: any) => {
 
 
             recordPlugin.on('record-start', (time: any) => {
-                // startSilenceDetection();
+                startSilenceDetection();
                 console.log("started");
             });
 
@@ -183,7 +196,7 @@ const AudioWave = ({ onUploadDone }: any) => {
 
             recordPlugin.on('record-end', (blob: Blob) => {
                 setIsRecording(false);
-                // clearSilenceTimer();
+                clearSilenceDetectionInterval();
                 handleAudioSubmission(blob);
             });
         }
